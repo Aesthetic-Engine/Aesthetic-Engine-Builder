@@ -1,6 +1,6 @@
 # Aesthetic Engine Builder
 
-**Build complete 1983-style wireframe games entirely via AI prompting — no sprites, no textures, no editor. Just math and lines.**
+**Build complete 1983-style wireframe games entirely via AI prompting — no sprites, no textures, no editor. Just you and Cursor building your game with math and lines.**
 
 Answer 5 game design questions in the Godot editor, copy the generated prompt, paste it into Cursor Agent chat, and watch a fully playable CRT wireframe game appear. Scanlines, phosphor glow, barrel distortion — the full 1983 microcomputer aesthetic, all code-generated.
 
