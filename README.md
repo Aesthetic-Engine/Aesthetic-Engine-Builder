@@ -11,7 +11,7 @@ Answer 5 game design questions in the Godot editor, copy the generated prompt, p
 - **Wireframe drawing engine** — lines, rectangles, polygons. Resolution-independent, proportional coordinates. Everything is math
 - **AI-verified builds** — generated prompts tell Cursor to launch the game via GRB, take a screenshot, and verify the result before reporting done
 - **Built-in sound editor** — optional retro synth + step sequencer (Intel 8253 pitch quantization, WAV export) that can be toggled into your game's main menu
-- **No AI-generated images** — all visuals are code-drawn vector graphics. No diffusion models, no sprites, no textures — just math and lines
+- **Pure code-drawn graphics** — no sprites, no textures, no image models. Every pixel is math and lines
 
 ## How It Works
 
