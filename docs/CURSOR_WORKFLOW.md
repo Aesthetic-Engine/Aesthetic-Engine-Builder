@@ -1,167 +1,167 @@
-# Aesthetic Engine Builder — Cursor Workflow
+# Aesthetic Engine Builder — Developer Reference
 
-Build 1983-style wireframe games entirely in Cursor. No editor, no sprites, no generative AI — pure math-generated graphics.
+A guide for developers who want to understand how the pieces fit together, extend their game manually, or customize the pipeline beyond what the AI-generated prompt covers.
 
-## Quick Start
+> **Note:** You don't need to read this to use Aesthetic Engine Builder. The generated prompt gives Cursor everything it needs. This is for when you want to go deeper.
 
-1. Open the project folder in Cursor.
-2. Open the project once in Godot to let it import (File → Open Project).
-3. From now on, edit `.gd` and `.json` files in Cursor. Run via GRB.
+## Architecture Overview
 
-## Adding a New Room
+```
+WireframeCanvas (320×200 virtual resolution)
+    └─ Room drawers: dl(), dr(), dp() → command buffer → _draw()
+         └─ CRTPipeline: SubViewport → phosphor decay → CRT shader → glass reflection
+              └─ Full-screen output
+```
 
-### Step 1: Create the room JSON
+All game visuals are code-drawn — lines, rectangles, and polygons rendered into a 320×200 virtual canvas, then processed through a CRT shader pipeline.
 
-Create `content/rooms/<room_id>.json`:
+## Drawing API
+
+WireframeCanvas provides these drawing functions (all use absolute pixel coordinates, 320×200):
+
+| Function | Purpose |
+|----------|---------|
+| `dl(from, to, color, width)` | Draw a line |
+| `dr(rect, color, filled)` | Draw a rectangle |
+| `dp(points, color, filled, width)` | Draw a polygon/polyline |
+| `dt(text, x, y, color, scale)` | Draw text (built-in 3×5 pixel font) |
+| `ds(value, x, y, color, digits, scale)` | Draw seven-segment score display |
+
+Colors: `WireframeCanvas.DEFAULT_COLOR` (bright green), `DIM_COLOR`, `BG_COLOR`.
+
+## Room System
+
+Rooms combine a JSON file (data, hotspots, actions) with a GDScript drawer function (visuals).
+
+### Room JSON (`content/rooms/<id>.json`)
 
 ```json
 {
-  "id": "kitchen",
-  "title": "Kitchen",
+  "id": "workshop",
+  "title": "Workshop",
   "procedural": true,
-  "procedural_scene": "kitchen",
+  "procedural_scene": "workshop",
   "hotspots": [
     {
-      "id": "sink",
-      "name": "Kitchen Sink",
-      "rect": [0.6, 0.3, 0.15, 0.15],
+      "id": "workbench",
+      "name": "Workbench",
+      "rect": [120, 80, 60, 40],
       "verbs": ["look", "use"],
-      "tags": ["fixture"]
+      "tags": ["furniture"]
     }
   ],
   "actions": [
     {
       "verb": "look",
-      "target": "sink",
-      "then": [{ "print": "A stainless steel sink. The faucet drips steadily." }]
-    },
-    {
-      "verb": "use",
-      "target": "sink",
-      "then": [{ "print": "You turn the tap. Brown water sputters out." }]
+      "target": "workbench",
+      "then": [{ "print": "A sturdy wooden bench covered in tools." }]
     }
   ],
   "events": [
     {
       "trigger": "enter",
-      "do": [{ "print": "The kitchen smells of old grease and forgotten meals." }]
+      "do": [{ "print": "Sawdust crunches underfoot." }]
     }
   ]
 }
 ```
 
-### Step 2: Write the drawer function
+### Room Drawer Function
 
-In `game/WireframeMain.gd`, add a registration and drawer:
+Register a drawable function in `WireframeMain.gd`:
 
 ```gdscript
-func _register_room_drawers() -> void:
-    _canvas.register_room_drawer("foyer", _draw_foyer)
-    _canvas.register_room_drawer("kitchen", _draw_kitchen)  # new
+_canvas.register_room_drawer("workshop", _draw_workshop)
 
-func _draw_kitchen(canvas: WireframeCanvas) -> void:
+func _draw_workshop(c: WireframeCanvas) -> void:
     var green := WireframeCanvas.DEFAULT_COLOR
     var dim := WireframeCanvas.DIM_COLOR
-    var wall_y := canvas.draw_interior_base(0.42)
 
-    # Countertop along right wall
-    var counter_x := canvas.px(0.55)
-    var counter_y := wall_y + 8
-    canvas.dr(Rect2(counter_x, counter_y, canvas.px(0.4), 4), green)
+    # Workbench
+    c.dr(Rect2(120, 80, 60, 8), green, false)
 
-    # Sink basin
-    var sink_x := canvas.px(0.65)
-    canvas.dr(Rect2(sink_x, counter_y + 4, 20, 12), dim)
-
-    # Faucet
-    canvas.dl(Vector2(sink_x + 10, counter_y), Vector2(sink_x + 10, counter_y - 14), green)
-    canvas.dl(Vector2(sink_x + 10, counter_y - 14), Vector2(sink_x + 16, counter_y - 10), green)
-
-    # Stove on left wall
-    var stove_x := canvas.px(0.1)
-    canvas.dr(Rect2(stove_x, counter_y, canvas.px(0.18), canvas.py(0.12)), dim)
-    # Burners
-    for i in range(4):
-        var bx := stove_x + 6 + (i % 2) * 16
-        var by := counter_y + 4 + (i / 2) * 10
-        canvas.dr(Rect2(bx, by, 8, 8), dim)
+    # Tools hanging on wall
+    c.dl(Vector2(130, 40), Vector2(130, 70), dim)
+    c.dl(Vector2(150, 35), Vector2(150, 70), dim)
+    c.dl(Vector2(170, 42), Vector2(170, 70), dim)
 ```
 
-### Step 3: Load it
+Load a room at runtime:
 
 ```gdscript
-load_room("kitchen")
+_canvas.load_scene("workshop")
 ```
 
-Or via GRB: send `run_custom_command` with `{ "cmd_name": "load_room", "args": { "room_id": "kitchen" } }`
+## Entity Animation
 
-## Drawing Tips
-
-### Proportional coordinates
-Use `canvas.px(frac)` and `canvas.py(frac)` so rooms look right at any resolution. The virtual resolution is 320×200.
-
-### Interior perspective
-`canvas.draw_interior_base(wall_frac)` draws floor, walls, ceiling lines, and vanishing-point perspective. It returns the wall_y position so you can place furniture relative to it.
-
-### Furniture patterns
-- **Tables/shelves**: Use `canvas.dr()` for rectangular surfaces
-- **Chairs**: Combine `canvas.dl()` lines for legs and back
-- **Windows**: `canvas.dr()` for frame + `canvas.dl()` for mullions
-- **Lamps**: `canvas.dl()` for stand + small `canvas.dr()` filled for shade
-
-### Entity animation
-Use `EntityRenderer` for anything that should jitter, flicker, or phase in/out:
+Use `EntityRenderer` for things that should jitter, flicker, or phase in/out:
 
 ```gdscript
 var entity_renderer := EntityRenderer.new()
 add_child(entity_renderer)
-entity_renderer.register_entity("shadow", _draw_shadow)
-entity_renderer.show_entity("shadow")
+entity_renderer.register_entity("ghost", _draw_ghost)
+entity_renderer.show_entity("ghost")
 entity_renderer.set_jitter_strength(0.7)
 entity_renderer.set_phase(EntityRenderer.Phase.LINE_DROP)
 ```
 
+## CRT Pipeline
+
+The `CRTPipeline` node handles all post-processing:
+
+- **Phosphor decay** — trails and afterglow
+- **CRT screen shader** — scanlines, barrel distortion, glow
+- **Glass reflection** — subtle screen reflection overlay
+
+Toggle complex effects at runtime:
+
+```gdscript
+_pipeline.extra_crt_effects = true   # phosphor decay, shimmer, breathing, reflection
+_pipeline.extra_crt_effects = false  # clean output, just scanlines and barrel distortion
+```
+
 ## Testing with GRB
 
-With GRB running, use these commands in Cursor:
+With Godot Runtime Bridge running, use these MCP tools:
 
-```
-grb_screenshot                          # capture current viewport
-run_custom_command load_room kitchen    # switch rooms
-run_custom_command list_rooms           # list available rooms
-grb_scene_tree                          # inspect scene
-grb_call_method Main load_room kitchen  # alternative room load
-```
+| Tool | Purpose |
+|------|---------|
+| `grb_launch` | Start the game |
+| `grb_screenshot` | Capture current viewport |
+| `grb_get_errors` | Check for runtime errors |
+| `grb_call_method` | Call methods on nodes |
+| `grb_run_custom_command` | Run registered game commands |
+| `grb_scene_tree` | Inspect the scene tree |
+| `grb_quit` | Stop the game |
 
 ## Project Structure
 
 ```
 aesthetic-engine-builder/
-├── project.godot                       # Godot project config
-├── main.tscn                           # Main scene
+├── project.godot
+├── main.tscn
 ├── addons/
-│   ├── godot-runtime-bridge/           # GRB addon (symlink or copy)
-│   └── grb-builder/                    # Aesthetic Engine Builder addon
+│   ├── godot-runtime-bridge/       # GRB addon — TCP debug server + MCP bridge
+│   └── grb-builder/                # Aesthetic Engine Builder addon
 │       ├── plugin.cfg
+│       ├── editor/
+│       │   └── BuilderDock.gd      # Design wizard + prompt generator
 │       ├── runtime/
-│       │   ├── WireframeCanvas.gd      # Command-buffer renderer
-│       │   ├── RoomLoader.gd           # JSON room loader
-│       │   ├── CRTPipeline.gd          # CRT post-processing
-│       │   └── EntityRenderer.gd       # Animated entities
+│       │   ├── WireframeCanvas.gd  # Command-buffer renderer
+│       │   ├── CRTPipeline.gd     # CRT post-processing
+│       │   ├── RoomLoader.gd      # JSON room loader
+│       │   └── EntityRenderer.gd  # Animated entities
 │       └── shaders/
-│           ├── crt_green_glow.gdshader
 │           ├── crt_screen.gdshader
+│           ├── crt_green_glow.gdshader
 │           ├── phosphor_decay.gdshader
 │           └── crt_reflection.gdshader
 ├── content/
-│   └── rooms/                          # Room JSON files
-│       ├── foyer.json
-│       └── empty.json
+│   └── rooms/                      # Room JSON files
 ├── game/
-│   └── WireframeMain.gd               # Game controller
-├── .cursor/
-│   └── rules/
-│       └── grb-builder.mdc            # Cursor rules
+│   ├── WireframeMain.gd           # Your game code (AI writes here)
+│   └── sound_editor/              # Retro synth + step sequencer
 └── docs/
-    └── CURSOR_WORKFLOW.md              # This file
+    ├── CURSOR_WORKFLOW.md          # This file
+    └── TENNIS_TUTORIAL.md          # Sample game walkthrough
 ```

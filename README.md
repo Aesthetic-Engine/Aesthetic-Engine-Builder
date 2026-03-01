@@ -84,7 +84,7 @@ WireframeCanvas (320×200 virtual resolution)
 ## Tutorials
 
 - [Building a Tennis Game](docs/TENNIS_TUTORIAL.md) — step-by-step walkthrough of the included sample game
-- [Cursor Workflow](docs/CURSOR_WORKFLOW.md) — how to build rooms and games via prompts
+- [Developer Reference](docs/CURSOR_WORKFLOW.md) — room system, entity animation, CRT pipeline, and project structure
 
 ## Requirements
 
