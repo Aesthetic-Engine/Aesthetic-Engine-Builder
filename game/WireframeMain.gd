@@ -1,4 +1,5 @@
 extends Control
+## Main game script — Aesthetic Engine Builder writes your game here.
 
 var _pipeline: CRTPipeline
 var _canvas: WireframeCanvas

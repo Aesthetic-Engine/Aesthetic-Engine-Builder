@@ -2,3 +2,5 @@
 *.tmp
 *.log
 debug/screenshots/*.png
+override.cfg
+.cursor/

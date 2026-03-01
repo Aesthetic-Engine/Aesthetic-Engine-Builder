@@ -1,0 +1,11 @@
+# Binary files
+*.ttf filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.import linguist-generated
+
+# Exclude from Asset Library / GitHub archive downloads
+.cursor/ export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
+override.cfg export-ignore
+debug/ export-ignore

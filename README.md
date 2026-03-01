@@ -15,7 +15,7 @@ Answer 5 game design questions in the Godot editor, copy the generated prompt, p
 
 ## How It Works
 
-1. Install the addon in Godot 4.5+
+1. Install the addon in Godot 4.6+
 2. Click the **Aesthetic Engine Builder** tab in the bottom panel
 3. Answer the 5 design pillar questions (examples and tooltips guide you)
 4. Optionally toggle **Include Sound Editor** to add a retro synth to your game
@@ -30,7 +30,7 @@ From there, keep prompting. *"Add a title screen." "Make the enemies faster." "A
 **Option 1 — Manual steps**
 
 1. Clone this repo or download from the Godot Asset Library.
-2. Open the project in Godot 4.5+ to import.
+2. Open the project in Godot 4.6+ to import.
 3. Open the project folder in Cursor: **File → Open Folder**.
 4. Configure `.cursor/mcp.json` with the GRB MCP server and your `GODOT_PATH` (path to your Godot executable):
 
@@ -88,7 +88,7 @@ WireframeCanvas (320×200 virtual resolution)
 
 ## Requirements
 
-- Godot 4.5+
+- Godot 4.6+
 - [Cursor](https://cursor.sh) (or any MCP-compatible AI agent)
 - Node.js (for the MCP bridge)
 
