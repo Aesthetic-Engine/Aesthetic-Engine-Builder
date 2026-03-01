@@ -1,0 +1,57 @@
+{
+  "id": "foyer",
+  "title": "Foyer",
+  "procedural": true,
+  "procedural_scene": "foyer",
+  "hotspots": [
+    {
+      "id": "front_door",
+      "name": "Front Door",
+      "rect": [0.39, 0.14, 0.22, 0.28],
+      "verbs": ["look", "use"],
+      "tags": ["door"]
+    },
+    {
+      "id": "coat_hooks",
+      "name": "Coat Hooks",
+      "rect": [0.06, 0.18, 0.12, 0.1],
+      "verbs": ["look"],
+      "tags": ["furniture"]
+    },
+    {
+      "id": "staircase",
+      "name": "Staircase",
+      "rect": [0.78, 0.42, 0.18, 0.25],
+      "verbs": ["look", "use"],
+      "tags": ["navigation"]
+    }
+  ],
+  "actions": [
+    {
+      "verb": "look",
+      "target": "front_door",
+      "then": [{ "print": "A heavy wooden door with ornate panels. Faint moonlight seeps through the windows beside it." }]
+    },
+    {
+      "verb": "use",
+      "target": "front_door",
+      "then": [{ "print": "The door is locked from the outside. You're not leaving that way." }]
+    },
+    {
+      "verb": "look",
+      "target": "coat_hooks",
+      "then": [{ "print": "Three brass hooks mounted to the wall. One holds a dusty coat." }]
+    },
+    {
+      "verb": "look",
+      "target": "staircase",
+      "then": [{ "print": "Wooden stairs leading up. They creak under their own weight." }]
+    }
+  ],
+  "events": [
+    {
+      "trigger": "enter",
+      "do": [{ "print": "You step into the foyer. The air is heavy and still." }]
+    }
+  ]
+}

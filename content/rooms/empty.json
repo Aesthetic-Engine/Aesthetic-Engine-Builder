@@ -1,0 +1,14 @@
+{
+  "id": "empty",
+  "title": "Empty Room",
+  "procedural": true,
+  "procedural_scene": "empty",
+  "hotspots": [],
+  "actions": [],
+  "events": [
+    {
+      "trigger": "enter",
+      "do": [{ "print": "An empty room. Waiting to be drawn." }]
+    }
+  ]
+}
